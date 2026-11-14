@@ -25,7 +25,7 @@ def list_memos(limit: int = 200) -> list[Memo]:
     try:
         data = response.json()
     except requests.JSONDecodeError:
-        log.error("List data error %s: %s", response.status_code, response.text[:200])
+        log.error("List data error: %s", response.text[:200])
         return []
 
     out: list[Memo] = []
@@ -71,7 +71,13 @@ def get_memo(memo_id: str) -> tuple[str, Memo | None]:
         return ("error", None)
 
     try:
-        return ("ok", Memo.from_payload(response.json()))
+        data = response.json()
+    except requests.JSONDecodeError:
+        log.error("Get data error: %s", response.text[:200])
+        return ("error", None)
+
+    try:
+        return ("ok", Memo.from_payload(data))
     except (KeyError, ValueError, TypeError) as e:
         log.warning("Malformed memo %s: %s", memo_id, e)
         return ("error", None)
