@@ -26,14 +26,14 @@ class ColoredFormatter(logging.Formatter):
     def format(self, record: logging.LogRecord) -> str:
         # Это пизда что я придумал нахуй
         # Добавляем к уровню пробелы чтобы выровнять красиво вывод
-        maxsize_levelname = len("CRITICAL")
+        max_levelname_size = len(logging.getLevelName(logging.CRITICAL))
         current_levelname_size = len(record.levelname)
-        add_spaces = maxsize_levelname - current_levelname_size
-        spaces = " " * add_spaces
+        difference_levelname_spaces = max_levelname_size - current_levelname_size
+        levelname_spaces = " " * difference_levelname_spaces
 
         # Задаём цвет разным частям лога в зависимости от их уровня
         level_color = self.LEVEL_COLORS.get(record.levelname, self.RESET)
-        record.levelname = f"{level_color}{record.levelname}{spaces}{self.RESET}"
+        record.levelname = f"{level_color}{record.levelname}{levelname_spaces}{self.RESET}"
         record.name = f"{self.GRAY}{record.name}{self.RESET}"
         record.funcName = f"{self.GRAY}{record.funcName}{self.RESET}"
         record.msg = f"{level_color}{record.msg}{self.RESET}"
