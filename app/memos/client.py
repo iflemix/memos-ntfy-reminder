@@ -22,8 +22,14 @@ def list_memos(limit: int = 200) -> list[Memo]:
         log.error("List returned %s: %s", response.status_code, response.text[:200])
         return []
 
+    try:
+        data = response.json()
+    except requests.JSONDecodeError:
+        log.error("List data error %s: %s", response.status_code, response.text[:200])
+        return []
+
     out: list[Memo] = []
-    for item in response.json().get("memos", []):
+    for item in data.get("memos", []):
         try:
             out.append(Memo.from_payload(item))
         except (KeyError, ValueError, TypeError) as e:
