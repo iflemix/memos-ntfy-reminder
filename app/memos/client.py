@@ -2,7 +2,7 @@ import requests
 
 from app.config import config
 from app.logger import get_logger
-from app.memos.models import Memo
+from app.memos.models import GetMemoResult, Memo
 
 log = get_logger(__name__)
 
@@ -55,32 +55,32 @@ def archive_memo(memo_id: str) -> bool:
     return True
 
 
-def get_memo(memo_id: str) -> tuple[str, Memo | None]:
+def get_memo(memo_id: str) -> GetMemoResult:
     try:
         url = f"{config.MEMOS_URL}/api/v1/{memo_id}"
         response = requests.get(url, headers=HEADERS, timeout=config.MEMOS_TIMEOUT)
     except requests.RequestException as e:
         log.error("Get failed: %s", e)
-        return ("error", None)
+        return GetMemoResult("error")
 
     if response.status_code == requests.codes.not_found:
-        return ("not_found", None)
-
+        return GetMemoResult("not_found")
     if not response.ok:
         log.error("Get returned %s: %s", response.status_code, response.text[:200])
-        return ("error", None)
+        return GetMemoResult("error")
 
     try:
         data = response.json()
     except requests.JSONDecodeError:
         log.error("Get data error: %s", response.text[:200])
-        return ("error", None)
+        return GetMemoResult("error")
 
     try:
-        return ("ok", Memo.from_payload(data))
+        memo = Memo.from_payload(data)
+        return GetMemoResult("ok", memo)
     except (KeyError, ValueError, TypeError) as e:
         log.warning("Malformed memo %s: %s", memo_id, e)
-        return ("error", None)
+        return GetMemoResult("error")
 
 
 def add_comment(memo_id: str, text: str) -> bool:

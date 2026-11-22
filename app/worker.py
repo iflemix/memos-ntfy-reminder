@@ -23,25 +23,25 @@ def run_once(conn: sqlite3.Connection, now_ts: int | None = None) -> int:
 
     sent = 0
     for row in rows:
-        status, memo = get_memo(row["memo_id"])
+        result = get_memo(row["memo_id"])
 
-        if status == "not_found":
+        if result.status == "not_found":
             log.info("Memo %s deleted, cancel id=%s", row["memo_id"], row["id"])
             repository.mark_cancelled(conn, row["id"], when=now_ts)
             continue
 
-        if status == "ok" and memo is not None and memo.state != "NORMAL":
+        if result.status == "ok" and result.memo is not None and result.memo.state != "NORMAL":
             log.info("Memo %s archived, cancel id=%s", row["memo_id"], row["id"])
             repository.mark_cancelled(conn, row["id"], when=now_ts)
             continue
 
-        if status == "error":
+        if result.status == "error":
             log.warning("Memos unavailable, sending anyway id=%s", row["id"])
 
         msg = _format_message(row["text"], row["due_at"], now_ts)
         if send_reminder(msg):
             repository.mark_sent(conn, row["id"], when=now_ts)
-            if status == "ok":
+            if result.status == "ok":
                 if not archive_memo(row["memo_id"]):
                     log.warning("Sent but archive failed memo=%s", row["memo_id"])
 

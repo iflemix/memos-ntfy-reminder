@@ -18,3 +18,9 @@ class Memo:
             create_time=datetime.fromisoformat(data["createTime"].replace("Z", "+00:00")),
             state=data["state"],
         )
+
+
+@dataclass(frozen=True, slots=True)
+class GetMemoResult:
+    status: Literal["ok", "not_found", "error"]
+    memo: Memo | None = None
