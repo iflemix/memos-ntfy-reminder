@@ -65,6 +65,7 @@ def get_memo(memo_id: str) -> GetMemoResult:
 
     if response.status_code == requests.codes.not_found:
         return GetMemoResult("not_found")
+
     if not response.ok:
         log.error("Get returned %s: %s", response.status_code, response.text[:200])
         return GetMemoResult("error")

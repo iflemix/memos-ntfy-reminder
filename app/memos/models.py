@@ -15,7 +15,7 @@ class Memo:
         return cls(
             id=data["name"],
             content=data["content"],
-            create_time=datetime.fromisoformat(data["createTime"].replace("Z", "+00:00")),
+            create_time=datetime.fromisoformat(data["createTime"]),
             state=data["state"],
         )
 
