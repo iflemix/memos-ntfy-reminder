@@ -72,15 +72,10 @@ def get_memo(memo_id: str) -> GetMemoResult:
 
     try:
         data = response.json()
-    except requests.JSONDecodeError:
-        log.error("Get data error: %s", response.text[:200])
-        return GetMemoResult("error")
-
-    try:
         memo = Memo.from_payload(data)
         return GetMemoResult("ok", memo)
-    except (KeyError, ValueError, TypeError) as e:
-        log.warning("Malformed memo %s: %s", memo_id, e)
+    except (requests.JSONDecodeError, KeyError, ValueError, TypeError) as e:
+        log.warning("Parse memo error: %s: %s", memo_id, e)
         return GetMemoResult("error")
 
 
